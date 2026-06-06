@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPORD // KICKING THE BUCKET // PTS</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c08;
+    --paper: #0f1209;
+    --green: #4aff5c;
+    --green-dim: #2a8a35;
+    --green-faint: #1a3d1f;
+    --amber: #ffb833;
+    --red: #ff3b3b;
+    --white: #d4e8c2;
+    --muted: #5a7a50;
+    --border: #2a4a25;
+    --stamp-red: rgba(200, 30, 30, 0.85);
+    --stamp-green: rgba(30, 160, 50, 0.80);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 20px;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 24px, rgba(74,255,92,0.015) 24px, rgba(74,255,92,0.015) 25px),
+      radial-gradient(ellipse at 50% 0%, rgba(74,255,92,0.05) 0%, transparent 60%);
+  }
+
+  /* CRT scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.07) 2px,
+      rgba(0,0,0,0.07) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.65) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .page {
+    max-width: 860px;
+    margin: 0 auto;
+    border: 1px solid var(--border);
+    background: var(--paper);
+    padding: 40px 50px;
+    position: relative;
+    box-shadow:
+      0 0 60px rgba(74,255,92,0.06),
+      inset 0 0 80px rgba(0,0,0,0.4);
+  }
+
+  /* Corner brackets */
+  .page::before, .page::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--green-dim);
+    border-style: solid;
+  }
+  .page::before { top: 8px; left: 8px; border-width: 2px 0 0 2px; }
+  .page::after  { bottom: 8px; right: 8px; border-width: 0 2px 2px 0; }
+
+  /* Extra corners via inner elements */
+  .corner-tr, .corner-bl {
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--green-dim);
+    border-style: solid;
+  }
+  .corner-tr { top: 8px; right: 8px; border-width: 2px 2px 0 0; }
+  .corner-bl { bottom: 8px; left: 8px; border-width: 0 0 2px 2px; }
+
+  /* ─── CLASSIFICATION BANNERS ─── */
+  .banner {
+    text-align: center;
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 6px;
+    padding: 5px 0;
+    margin-bottom: 6px;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    animation: flicker 8s infinite;
+  }
+  .banner-top {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(200,30,30,0.06);
+    margin-bottom: 28px;
+  }
+  .banner-bottom {
+    color: var(--red);
+    border-color: var(--red);
+    background: rgba(200,30,30,0.06);
+    margin-top: 28px;
+  }
+
+  @keyframes flicker {
+    0%,96%,100% { opacity: 1; }
+    97% { opacity: 0.7; }
+    98% { opacity: 1; }
+    99% { opacity: 0.6; }
+  }
+
+  /* ─── HEADER ─── */
+  .doc-header {
+    text-align: center;
+    margin-bottom: 32px;
+    position: relative;
+  }
+
+  .org-name {
+    font-family: 'Special Elite', cursive;
+    font-size: 22px;
+    color: var(--green);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(74,255,92,0.5), 0 0 40px rgba(74,255,92,0.2);
+    margin-bottom: 4px;
+  }
+
+  .op-name {
+    font-family: 'Courier Prime', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--amber);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(255,184,51,0.4);
+    margin: 8px 0;
+  }
+
+  .doc-subheader {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 3px;
+    margin-top: 6px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+    position: relative;
+  }
+  .divider::before {
+    content: '◆';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+    background: var(--paper);
+    padding: 0 8px;
+    color: var(--green-dim);
+    font-size: 10px;
+  }
+
+  /* ─── META INFO BOX ─── */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
+    border: 1px solid var(--green-faint);
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    background: rgba(74,255,92,0.02);
+    position: relative;
+  }
+  .meta-grid::before {
+    content: 'DOCUMENT METADATA';
+    position: absolute;
+    top: -8px;
+    left: 12px;
+    background: var(--paper);
+    padding: 0 6px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--green-dim);
+  }
+
+  .meta-row { display: flex; gap: 8px; padding: 2px 0; }
+  .meta-label { color: var(--muted); min-width: 110px; font-size: 11px; }
+  .meta-value { color: var(--white); font-size: 11px; }
+  .meta-value.highlight { color: var(--amber); }
+
+  /* ─── STAMP ─── */
+  .stamp-container {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    transform: rotate(-12deg);
+    opacity: 0.9;
+    pointer-events: none;
+  }
+
+  .stamp {
+    border: 3px solid var(--stamp-red);
+    color: var(--stamp-red);
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 4px;
+    padding: 6px 12px;
+    text-align: center;
+    line-height: 1.4;
+    text-shadow: 0 0 8px rgba(200,30,30,0.5);
+    box-shadow: 0 0 0 1px rgba(200,30,30,0.2) inset;
+    background: rgba(10,12,8,0.4);
+  }
+
+  /* ─── SECTIONS ─── */
+  .section {
+    margin-bottom: 26px;
+  }
+
+  .section-header {
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--green);
+    border-bottom: 1px solid var(--green-faint);
+    padding-bottom: 5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-num {
+    color: var(--amber);
+    font-size: 11px;
+    min-width: 24px;
+  }
+
+  .section-tag {
+    margin-left: auto;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+  }
+
+  /* ─── BODY TEXT ─── */
+  .field-block {
+    margin-bottom: 14px;
+    padding-left: 16px;
+    border-left: 2px solid var(--green-faint);
+  }
+
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .field-value {
+    color: var(--white);
+    line-height: 1.7;
+  }
+
+  /* ─── LISTS ─── */
+  .order-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .order-list li {
+    padding: 5px 0 5px 20px;
+    position: relative;
+    border-bottom: 1px dotted rgba(74,255,92,0.08);
+    color: var(--white);
+    line-height: 1.6;
+  }
+
+  .order-list li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--green-dim);
+    font-size: 10px;
+    top: 7px;
+  }
+
+  .order-list.sub {
+    margin-left: 20px;
+    margin-top: 4px;
+  }
+
+  .order-list.sub li::before {
+    content: '–';
+    color: var(--muted);
+  }
+
+  .order-list.sub2 {
+    margin-left: 36px;
+  }
+  .order-list.sub2 li::before {
+    content: '·';
+    color: var(--border);
+  }
+
+  /* ─── CALLOUT / INTEL BOX ─── */
+  .intel-box {
+    border: 1px solid var(--amber);
+    background: rgba(255,184,51,0.04);
+    padding: 12px 16px;
+    margin: 14px 0;
+    position: relative;
+  }
+  .intel-box::before {
+    content: '⚠ INTEL NOTE';
+    position: absolute;
+    top: -8px;
+    left: 10px;
+    background: var(--paper);
+    padding: 0 6px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--amber);
+  }
+  .intel-box p { color: var(--amber); font-size: 12px; line-height: 1.6; }
+  .intel-box .quote {
+    color: var(--red);
+    font-style: italic;
+    margin-top: 4px;
+    padding-left: 10px;
+    border-left: 2px solid var(--red);
+  }
+
+  /* ─── TIMELINE BAR ─── */
+  .timeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 14px 0;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .tl-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    flex: 1;
+    position: relative;
+  }
+
+  .tl-node::after {
+    content: '';
+    position: absolute;
+    top: 8px;
+    right: -50%;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, var(--green-dim), var(--border));
+  }
+  .tl-node:last-child::after { display: none; }
+
+  .tl-dot {
+    width: 12px; height: 12px;
+    border: 2px solid var(--green-dim);
+    background: var(--paper);
+    position: relative;
+    z-index: 1;
+    transform: rotate(45deg);
+  }
+  .tl-dot.active {
+    border-color: var(--amber);
+    background: rgba(255,184,51,0.2);
+    box-shadow: 0 0 8px rgba(255,184,51,0.4);
+  }
+
+  .tl-label { color: var(--muted); text-align: center; max-width: 90px; line-height: 1.3; }
+  .tl-time  { color: var(--green); font-size: 9px; }
+
+  /* ─── LINK STYLE ─── */
+  a {
+    color: var(--green);
+    text-decoration: none;
+    border-bottom: 1px dashed var(--green-dim);
+    letter-spacing: 1px;
+    font-size: 11px;
+  }
+  a:hover { color: var(--amber); border-color: var(--amber); }
+
+  /* ─── FOOTER ─── */
+  .doc-footer {
+    margin-top: 32px;
+    border-top: 1px solid var(--border);
+    padding-top: 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  .sig-block {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .sig-line {
+    border-top: 1px solid var(--green-dim);
+    padding-top: 4px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* Pulsing active indicator */
+  .live-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--green);
+  }
+  .live-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; box-shadow: 0 0 4px var(--green); }
+    50% { opacity: 0.3; box-shadow: none; }
+  }
+
+  /* Print-friendly watermark */
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-family: 'Courier Prime', monospace;
+    font-size: 96px;
+    font-weight: 700;
+    color: rgba(200,30,30,0.04);
+    letter-spacing: 12px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 998;
+    user-select: none;
+  }
+
+  /* Type-in animation for header */
+  @keyframes typein {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate-in { animation: typein 0.5s ease forwards; }
+  .delay-1 { animation-delay: 0.1s; opacity: 0; }
+  .delay-2 { animation-delay: 0.25s; opacity: 0; }
+  .delay-3 { animation-delay: 0.4s; opacity: 0; }
+  .delay-4 { animation-delay: 0.55s; opacity: 0; }
+
+</style>
+</head>
+<body>
+
+<div class="watermark">CLASSIFIED</div>
+
+<div class="page">
+  <div class="corner-tr"></div>
+  <div class="corner-bl"></div>
+
+  <!-- CLASSIFICATION BANNER TOP -->
+  <div class="banner banner-top animate-in delay-1">⬛ TOP SECRET // SPECIAL ACCESS REQUIRED // NOFORN ⬛</div>
+
+  <!-- STAMP -->
+  <div class="stamp-container">
+    <div class="stamp">OPERATION<br>KICKING THE<br>BUCKET<br>──────<br>CLASSIFIED</div>
+  </div>
+
+  <!-- HEADER -->
+  <div class="doc-header animate-in delay-2">
+    <div class="org-name">Parisot Tactical Solutions</div>
+    <div class="op-name">KICKING THE BUCKET</div>
+    <div class="doc-subheader">OPERATIONS ORDER (OPORD) // 5-PARAGRAPH FORMAT</div>
+    <div class="doc-subheader" style="margin-top:8px">
+      <span class="live-indicator"><span class="live-dot"></span>PENDING EXECUTION</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- META -->
+  <div class="meta-grid animate-in delay-3">
+    <div class="meta-row">
+      <span class="meta-label">PREPARED BY:</span>
+      <span class="meta-value highlight">MGR. B. "CAMPER" G.</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">CLASSIFICATION:</span>
+      <span class="meta-value" style="color:var(--red)">TOP SECRET</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">OP WINDOW START:</span>
+      <span class="meta-value">12TH JULY 2025</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">OP WINDOW END:</span>
+      <span class="meta-value">16TH AUGUST 2025</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">DEPLOY NLT:</span>
+      <span class="meta-value highlight">2030 EST / 0600Z — 22 JUL 2025</span>
+    </div>
+    <div class="meta-row">
+      <span class="meta-label">AO:</span>
+      <span class="meta-value">ISLE OF FANTASMO → ISLA MARIANA</span>
+    </div>
+  </div>
+
+  <!-- TIMELINE -->
+  <div style="margin-bottom:28px;" class="animate-in delay-4">
+    <div class="field-label" style="margin-bottom:8px; padding-left:0;">OPERATION TIMELINE</div>
+    <div class="timeline">
+      <div class="tl-node">
+        <div class="tl-dot active"></div>
+        <div class="tl-label">DEAL MADE<br>WITH JARA</div>
+        <div class="tl-time">D-5</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-label">INFIL<br>MEETING PT</div>
+        <div class="tl-time">22 JUL / 0600Z</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-label">HANDOFF<br>EXECUTION</div>
+        <div class="tl-time">OBJ ALPHA</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-label">SNATCH<br>& GRAB</div>
+        <div class="tl-time">OBJ BRAVO</div>
+      </div>
+      <div class="tl-node">
+        <div class="tl-dot"></div>
+        <div class="tl-label">SSE + EXFIL<br>ISLA MARIANA</div>
+        <div class="tl-time">ENDSTATE</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARA 1: SITUATION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">PARA 1</span>
+      SITUATION
+      <span class="section-tag">UNVERIFIED INTEL</span>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Commander's Intent</div>
+      <div class="field-value">
+        While making contact with Local Warlord PEDRO JARA, Parisot negotiated a deal for $100,000 USD to secure protection of supply drops, along with a Cartel contingent attachment. Five (5) days following the deal, Parisot will conduct the handoff via briefcase (RIGGED — HANDLE WITH CARE). Following detonation, Parisot will move to capture the Cartel contingent and pull back to the Airfield for exfil from ISLE OF FANTASMO. Will then proceed to ISLA MARIANA to continue primary mission and reestablish IDAP cover.
+      </div>
+    </div>
+
+    <div class="intel-box">
+      <p>Assessment of attached Cartel contingent personnel. Sourced from field reporting:</p>
+      <div class="quote">— L. ARCHER &amp; W. WILSON: "A fucking shit-bag asshole."</div>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Enemy Forces</div>
+      <ul class="order-list">
+        <li>Local Warlord Forces / Colombian Cartel
+          <ul class="order-list sub">
+            <li>Platoon Size Element — WARLORD FORCES</li>
+            <li>Three (3) x Squads — CARTEL</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Friendly Forces</div>
+      <ul class="order-list">
+        <li>PTS Ground Forces</li>
+        <li>PTS Aviation
+          <ul class="order-list sub">
+            <li>C-212-300 Aviocar — 2x</li>
+            <li>Cessna TTx — 2x</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PARA 2: MISSION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">PARA 2</span>
+      MISSION
+      <span class="section-tag">EXECUTE</span>
+    </div>
+
+    <div class="field-block">
+      <div class="field-value">
+        Ground and Aviation elements will deploy NLT <span style="color:var(--amber);font-weight:700">2030 EST / 0600Z on 22 JUL 2025</span> from FANTASMO ISLE AIRPORT to the Meeting Point (determined by subordinate units) to conduct handoff and receive supply drop. Following handoff, PTS returns to Airfield to gear up for capture of one (1) Cartel Contingent for intel on mainland operations. Upon completion of both objectives, PTS will conduct SSE of Airfield hideout, then exfil to ISLA MARIANA's airfield and reestablish IDAP cover.
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;">
+      <div class="intel-box" style="border-color:var(--green-dim); background:rgba(74,255,92,0.03);">
+        <div style="font-size:9px; position:absolute; top:-8px; left:10px; background:var(--paper); padding:0 6px; letter-spacing:3px; color:var(--green-dim);">OBJ ALPHA</div>
+        <p style="color:var(--white); margin-top:4px;">JARA HANDOFF<br><span style="color:var(--muted); font-size:11px;">Briefcase delivery. IED confirmed active.</span></p>
+      </div>
+      <div class="intel-box" style="border-color:var(--green-dim); background:rgba(74,255,92,0.03);">
+        <div style="font-size:9px; position:absolute; top:-8px; left:10px; background:var(--paper); padding:0 6px; letter-spacing:3px; color:var(--green-dim);">OBJ BRAVO</div>
+        <p style="color:var(--white); margin-top:4px;">CARTEL SNATCH & GRAB<br><span style="color:var(--muted); font-size:11px;">Under cover of darkness. Intel extraction.</span></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- PARA 3: EXECUTION -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">PARA 3</span>
+      EXECUTION
+      <span class="section-tag">CONOPs</span>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Concept of Operation — Scheme of Maneuver</div>
+      <ul class="order-list">
+        <li>
+          <strong style="color:var(--green)">Parisot Tactical Solutions:</strong> Infil via IDAP vehicles to Meeting Point. Hold until Target arrives. Conduct handoff. Move back to Airfield to gear up for snatch-and-grab of Cartel member — under cover of darkness.
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PARA 4: SERVICE AND SUPPORT -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">PARA 4</span>
+      SERVICE AND SUPPORT
+      <span class="section-tag">ADMIN/LOG</span>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Ground Elements</div>
+      <div class="field-value">Gear and uniforms established by subordinate units.</div>
+    </div>
+  </div>
+
+  <!-- PARA 5: COMMAND AND SIGNAL -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-num">PARA 5</span>
+      COMMAND AND SIGNAL
+      <span class="section-tag">C2</span>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Signal / Comms</div>
+      <div class="field-value">
+        Reference: <a href="https://docs.google.com/spreadsheets/d/104l9_62ZopmPL7ziEE7KLw-9N2MrUPb8pHHS16LIMRo/edit?usp=sharing" target="_blank">▸ PARISOT TACTICAL TO&amp;E [EXTERNAL LINK]</a>
+      </div>
+    </div>
+
+    <div class="field-block">
+      <div class="field-label">Pyro</div>
+      <div class="field-value">
+        Reference: <a href="https://docs.google.com/spreadsheets/d/104l9_62ZopmPL7ziEE7KLw-9N2MrUPb8pHHS16LIMRo/edit?usp=sharing" target="_blank">▸ PARISOT TACTICAL TO&amp;E [EXTERNAL LINK]</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE BLOCK -->
+  <div class="sig-block">
+    <div class="sig-line">
+      _________________________________<br>
+      PREPARED BY: MGR. B. "CAMPER" G.<br>
+      PARISOT TACTICAL SOLUTIONS
+    </div>
+    <div class="sig-line">
+      _________________________________<br>
+      ACKNOWLEDGED BY:<br>
+      ________________________________
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <span>PTS-OPORD-2025-0722-KTB</span>
+    <span>PAGE 1 OF 1</span>
+    <span>HANDLE VIA SPECAT CHANNELS ONLY</span>
+  </div>
+
+  <!-- CLASSIFICATION BANNER BOTTOM -->
+  <div class="banner banner-bottom">⬛ TOP SECRET // SPECIAL ACCESS REQUIRED // NOFORN ⬛</div>
+</div>
+
+</body>
+</html>
